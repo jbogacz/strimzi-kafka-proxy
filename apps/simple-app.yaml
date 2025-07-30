@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: simple-app
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: simple-app
+spec:
+  project: default
+  source:
+    repoURL: git://host.docker.internal:9418/argocd-demo.git
+    targetRevision: HEAD
+    path: apps/simple-app
+    helm:
+      valueFiles:
+      - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kafka-cluster
+description: A Helm chart for deploying Kafka cluster using Strimzi operator
+type: application
+version: 0.1.0
+appVersion: "3.8.0"
+dependencies: []

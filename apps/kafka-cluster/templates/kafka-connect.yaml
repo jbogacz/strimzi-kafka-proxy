@@ -1,0 +1,35 @@
+{{- if .Values.kafkaConnect.enabled }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: {{ .Values.kafka.name }}-connect
+  labels:
+    {{- include "kafka-cluster.labels" . | nindent 4 }}
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: {{ .Values.kafka.version }}
+  replicas: {{ .Values.kafkaConnect.replicas }}
+  bootstrapServers: {{ .Values.kafkaConnect.bootstrapServers | default (printf "%s-kafka-bootstrap:9092" .Values.kafka.name) }}
+  config:
+    group.id: connect-cluster
+    offset.storage.topic: connect-cluster-offsets
+    config.storage.topic: connect-cluster-configs
+    status.storage.topic: connect-cluster-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+  resources:
+    {{- toYaml .Values.kafkaConnect.resources | nindent 4 }}
+  storage:
+    {{- if eq .Values.kafkaConnect.storage.type "persistent-claim" }}
+    type: persistent-claim
+    size: {{ .Values.kafkaConnect.storage.size }}
+    {{- if .Values.kafkaConnect.storage.storageClass }}
+    class: {{ .Values.kafkaConnect.storage.storageClass }}
+    {{- end }}
+    {{- else }}
+    type: {{ .Values.kafkaConnect.storage.type }}
+    {{- end }}
+{{- end }}

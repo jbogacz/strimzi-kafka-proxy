@@ -1,0 +1,43 @@
+replicaCount: 5
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "1.21"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Add a simple configmap for custom content
+configMap:
+  enabled: true
+  data:
+    index.html: |
+      <!DOCTYPE html>
+      <html>
+      <head><title>GitOps Demo</title></head>
+      <body>
+        <h1>Hello from ArgoCD!</h1>
+        <p>This app was deployed via GitOps 🚀</p>
+        <p>Version: 1.0</p>
+      </body>
+      </html>
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80

@@ -1,0 +1,130 @@
+# Kafka cluster configuration
+kafka:
+  # Kafka cluster name
+  name: my-cluster
+
+  # Number of Kafka replicas
+  replicas: 3
+
+  # Kafka version (compatible with Strimzi 0.45.0)
+  version: 3.8.1
+
+  # Storage configuration
+  storage:
+    type: persistent-claim
+    size: 10Gi
+    storageClass: ""
+    deleteClaim: false
+
+  # Resource configuration
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  # JVM heap options
+  jvmOptions:
+    -Xms: 512m
+    -Xmx: 1g
+
+  # Kafka configuration
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    inter.broker.protocol.version: "3.8"
+    log4j.logger.kafka.controller: "INFO"
+
+# ZooKeeper configuration
+zookeeper:
+  # Number of ZooKeeper replicas
+  replicas: 3
+
+  # Storage configuration
+  storage:
+    type: persistent-claim
+    size: 5Gi
+    storageClass: ""
+    deleteClaim: false
+
+  # Resource configuration
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Entity Operator configuration (Topic and User operators)
+entityOperator:
+  enabled: true
+
+  # Topic Operator
+  topicOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  # User Operator
+  userOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# Kafka Connect configuration (optional)
+kafkaConnect:
+  enabled: false
+  replicas: 3
+
+  # Bootstrap servers (will be set automatically if not specified)
+  bootstrapServers: ""
+
+  # Storage configuration
+  storage:
+    type: persistent-claim
+    size: 5Gi
+    storageClass: ""
+
+  # Resource configuration
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+# Monitoring configuration
+monitoring:
+  enabled: false
+
+  # Prometheus metrics
+  prometheus:
+    enabled: false
+
+  # JMX metrics
+  jmx:
+    enabled: false
+
+# Network policies
+networkPolicies:
+  enabled: false
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  maxUnavailable: 1

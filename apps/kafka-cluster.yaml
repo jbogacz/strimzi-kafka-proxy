@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-cluster
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: kafka-cluster
+spec:
+  project: default
+  source:
+    repoURL: git://host.docker.internal:9418/argocd-demo.git
+    targetRevision: HEAD
+    path: apps/kafka-cluster
+    helm:
+      valueFiles:
+      - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  # Sync wave to ensure Strimzi operator is deployed first
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    managedNamespaceMetadata:
+      labels:
+        name: kafka

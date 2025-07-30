@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-topics
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: kafka-topics
+spec:
+  project: default
+  source:
+    repoURL: git://host.docker.internal:9418/argocd-demo.git
+    path: kafka-topics
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
