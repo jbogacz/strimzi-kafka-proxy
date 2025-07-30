@@ -45,13 +45,18 @@ This project demonstrates the ArgoCD "app-of-apps" pattern with a local Git serv
 │   │   └── templates/
 │   ├── strimzi-operator.yaml  # ArgoCD Application for Strimzi operator
 │   ├── kafka-cluster.yaml     # ArgoCD Application for Kafka cluster
-│   └── kafka-cluster/         # Helm chart for Kafka cluster
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
-│           ├── kafka.yaml
-│           ├── kafka-connect.yaml
-│           └── pdb.yaml
+│   ├── kafka-cluster/         # Helm chart for Kafka cluster
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   │       ├── kafka.yaml
+│   │       ├── kafka-connect.yaml
+│   │       └── pdb.yaml
+│   ├── kafka-topics.yaml      # ArgoCD Application for Kafka topics
+│   └── kafka-ui.yaml          # ArgoCD Application for Kafka UI
+├── kafka-topics/              # Kafka topic definitions
+│   ├── foo-topic.yaml         # Example Kafka topic
+│   └── bar-topic.yaml         # Example Kafka topic
 ├── scripts/
 │   ├── init-git.sh            # Initialize local Git server (alternative)
 │   ├── sync-git.sh            # Sync changes to Git server
@@ -185,6 +190,27 @@ Edit `apps/kafka-cluster/values.yaml` to customize:
 - Enable/disable Kafka Connect
 - Monitoring configuration
 
+### Kafka Topics
+
+The project includes a dedicated ArgoCD application for managing Kafka topics (`apps/kafka-topics.yaml`):
+
+- **Topic Management**: Automatically deploys KafkaTopic custom resources
+- **Example Topics**: `foo-topic` and `bar-topic` with 3 partitions and replicas
+- **Configuration**: Topics include retention, segment size, and cleanup policies
+- **Namespace**: Topics are deployed to the `kafka` namespace
+
+Topic definitions are stored in the `kafka-topics/` directory and managed as Kubernetes custom resources by the Strimzi operator.
+
+### Kafka UI
+
+The project includes Kafka UI for web-based cluster management (`apps/kafka-ui.yaml`):
+
+- **Version**: 0.7.5 using the official Provectus Helm chart
+- **Access**: Available on NodePort 30080 (http://localhost:30080)
+- **Features**: Topic management, consumer groups, message browsing
+- **Configuration**: Pre-configured to connect to the `my-cluster` Kafka cluster
+- **Resources**: 256Mi-512Mi memory, 100m-200m CPU limits
+
 ## Useful Commands
 
 ```bash
@@ -208,6 +234,15 @@ kubectl get pods,svc -n kafka
 
 # View Strimzi operator logs
 kubectl logs -f deployment/strimzi-cluster-operator -n kafka
+
+# Access Kafka UI (web interface)
+# URL: http://localhost:30080
+
+# Check Kafka topics
+kubectl get kafkatopics -n kafka
+
+# View Kafka UI logs
+kubectl logs -f deployment/kafka-ui -n kafka
 
 # Sync changes to Git server
 ./scripts/sync-git.sh
