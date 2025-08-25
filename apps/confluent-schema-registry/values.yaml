@@ -1,0 +1,8 @@
+schema-registry:
+  enabled: true
+  kafka:
+    bootstrapServers: "my-cluster-kafka-bootstrap.kafka:9092"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
