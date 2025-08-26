@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: schema-publisher-job-2
+  namespace: kafka
+spec:
+  template:
+    spec:
+      containers:
+        - name: schema-publisher
+          image: python:3.9-slim
+          command:
+            - python
+            - /scripts/hello.py
+          volumeMounts:
+            - name: script-volume
+              mountPath: /scripts
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      volumes:
+        - name: script-volume
+          configMap:
+            name: schema-publisher-config
+            defaultMode: 0755
+      restartPolicy: Never
+  backoffLimit: 3

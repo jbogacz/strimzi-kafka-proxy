@@ -78,6 +78,10 @@ kubectl patch svc argocd-server -n $ARGOCD_NAMESPACE -p '{"spec":{"type":"NodePo
 # Get ArgoCD admin password
 echo "🔑 Getting ArgoCD admin password..."
 ARGOCD_PASSWORD=$(kubectl -n $ARGOCD_NAMESPACE get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+echo $ARGOCD_PASSWORD > .argocd_password
+
+echo "🔧 Applying root-app.yaml..."
+kubectl apply -f root-app.yaml
 
 echo "✅ Kind cluster with ArgoCD setup complete!"
 echo ""

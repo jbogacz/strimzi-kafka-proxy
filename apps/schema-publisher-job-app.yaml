@@ -1,21 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kafka-cluster
+  name: schema-publisher-job
   namespace: argocd
   labels:
-    app.kubernetes.io/name: kafka-cluster
+    app.kubernetes.io/name: schema-publisher-job
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   project: default
   source:
     repoURL: git://host.docker.internal:9418/argocd-demo.git
     targetRevision: HEAD
-    path: apps/kafka-cluster
-    helm:
-      valueFiles:
-      - values.yaml
+    path: apps/schema-publisher-job
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka
