@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: schema-publisher-job-2
+  name: schema-publisher-job
   namespace: kafka
 spec:
   template:
@@ -10,8 +10,9 @@ spec:
         - name: schema-publisher
           image: python:3.9-slim
           command:
-            - python
-            - /scripts/hello.py
+            - /bin/sh
+            - -c
+            - pip install "confluent-kafka[protobuf]" && python /scripts/hello.py
           volumeMounts:
             - name: script-volume
               mountPath: /scripts
