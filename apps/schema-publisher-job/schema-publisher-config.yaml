@@ -36,7 +36,8 @@ data:
         schema_registry_conf = {"url": "http://confluent-schema-registry-app.kafka:8081"}
         client = SchemaRegistryClient(schema_registry_conf)
 
-        schema = Schema(schema_str, schema_type="PROTOBUF", references=[{"name": f"com.example.{message_type}"}])
+        from confluent_kafka.schema_registry import SchemaReference
+        schema = Schema(schema_str, schema_type="PROTOBUF", references=[SchemaReference(name=f"com.example.{message_type}", subject=None, version=None)])
         subject_name = f"foo-topic-{message_type.lower()}-value"
         schema_id = client.register_schema(subject_name, schema)
 
