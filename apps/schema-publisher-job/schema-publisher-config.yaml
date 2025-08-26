@@ -30,14 +30,17 @@ data:
     def main():
         print("Hello from Python!!")
 
+        # Choose which message type to register
+        message_type = "User"  # Can be "User" or "Product"
+
         schema_registry_conf = {"url": "http://confluent-schema-registry-app.kafka:8081"}
         client = SchemaRegistryClient(schema_registry_conf)
 
-        schema = Schema(schema_str, schema_type="PROTOBUF")
-        subject_name = "foo-topic-value"
+        schema = Schema(schema_str, schema_type="PROTOBUF", references=[{"name": f"com.example.{message_type}"}])
+        subject_name = f"foo-topic-{message_type.lower()}-value"
         schema_id = client.register_schema(subject_name, schema)
 
-        print(f"Schema for subject '{subject_name}' registered with ID: {schema_id}")
+        print(f"Schema for message type '{message_type}' registered with subject '{subject_name}' and ID: {schema_id}")
 
     if __name__ == "__main__":
         main()
