@@ -38,22 +38,31 @@ This project demonstrates the ArgoCD "app-of-apps" pattern with a local Git serv
 ```
 .
 ├── apps/
-│   ├── simple-app.yaml        # ArgoCD Application for simple nginx app
-│   ├── simple-app/            # Helm chart for simple nginx app
+│   ├── simple-app.yaml                    # ArgoCD Application for simple nginx app
+│   ├── simple-app/                        # Helm chart for simple nginx app
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   ├── strimzi-operator.yaml  # ArgoCD Application for Strimzi operator
-│   ├── kafka-cluster.yaml     # ArgoCD Application for Kafka cluster
-│   ├── kafka-cluster/         # Helm chart for Kafka cluster
+│   ├── strimzi-operator.yaml              # ArgoCD Application for Strimzi operator (sync-wave: 1)
+│   ├── kafka-cluster.yaml                 # ArgoCD Application for Kafka cluster (sync-wave: 2)
+│   ├── kafka-cluster/                     # Helm chart for Kafka cluster
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
 │   │       ├── kafka.yaml
 │   │       ├── kafka-connect.yaml
 │   │       └── pdb.yaml
-│   ├── kafka-topics.yaml      # ArgoCD Application for Kafka topics
-│   └── kafka-ui.yaml          # ArgoCD Application for Kafka UI
+│   ├── kafka-topics.yaml                  # ArgoCD Application for Kafka topics
+│   ├── kafka-ui.yaml                      # ArgoCD Application for Kafka UI
+│   ├── confluent-schema-registry-app.yaml # ArgoCD Application for Confluent Schema Registry
+│   ├── confluent-schema-registry/         # Helm chart for Schema Registry
+│   │   ├── Chart.yaml
+│   │   └── values.yaml
+│   ├── schema-publisher-job-app.yaml      # ArgoCD Application for schema publishing job (sync-wave: 3)
+│   ├── schema-publisher-job/              # Schema publisher job resources
+│   │   ├── schema-publisher-config.yaml   # ConfigMap with Python script
+│   │   └── schema-publisher-job.yaml      # Job definition
+│   └── kafka-namespace.yaml               # Kafka namespace creation (sync-wave: -1)
 ├── kafka-topics/              # Kafka topic definitions
 │   ├── foo-topic.yaml         # Example Kafka topic
 │   └── bar-topic.yaml         # Example Kafka topic
@@ -210,6 +219,34 @@ The project includes Kafka UI for web-based cluster management (`apps/kafka-ui.y
 - **Features**: Topic management, consumer groups, message browsing
 - **Configuration**: Pre-configured to connect to the `my-cluster` Kafka cluster
 - **Resources**: 256Mi-512Mi memory, 100m-200m CPU limits
+
+### Confluent Schema Registry
+
+The project includes Confluent Schema Registry for managing Avro/JSON schemas (`apps/confluent-schema-registry-app.yaml`):
+
+- **Version**: Latest from Confluent Helm chart
+- **Purpose**: Centralized schema management for Kafka producers/consumers
+- **Integration**: Connected to the Kafka cluster for schema storage
+- **Namespace**: Deployed to the `kafka` namespace
+
+### Schema Publisher Job
+
+A dedicated job for publishing protobuf schemas to the Schema Registry (`apps/schema-publisher-job-app.yaml`):
+
+- **Purpose**: Automated schema publishing and validation
+- **Components**: ConfigMap with Python script and Job definition  
+- **Sync Wave**: Deploys after Kafka cluster (sync-wave: 3)
+- **Location**: Resources in `apps/schema-publisher-job/` directory
+
+## Sync Wave Management
+
+The project uses ArgoCD sync waves to ensure proper deployment ordering:
+
+- **Wave -1**: `kafka-namespace.yaml` - Creates kafka namespace first
+- **Wave 1**: `strimzi-operator.yaml` - Deploys Strimzi operator
+- **Wave 2**: `kafka-cluster.yaml` - Deploys Kafka cluster after operator
+- **Wave 3**: `schema-publisher-job-app.yaml` - Deploys schema publisher after cluster
+- **Wave 0 (default)**: All other applications deploy in parallel
 
 ## Useful Commands
 
