@@ -30,7 +30,7 @@ data:
     def main():
         print("Hello from Python!!")
 
-        schema_registry_conf = {"url": "http://confluent-schema-registry-app.kafka:8081"}
+        schema_registry_conf = {"url": "http://confluent-schema-registry.kafka:8081"}
         client = SchemaRegistryClient(schema_registry_conf)
 
         schema = Schema(schema_str, schema_type="PROTOBUF")

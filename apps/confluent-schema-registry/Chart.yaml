@@ -2,9 +2,15 @@ apiVersion: v2
 name: confluent-schema-registry
 description: A Helm chart for Confluent Schema Registry
 type: application
-version: 1.0.0
-appVersion: "7.5.0" # Use a version that matches your Confluent platform
-dependencies:
-- name: schema-registry
-  version: "26.0.5" # Use the latest Confluent/Bitnami chart version
-  repository: "oci://registry-1.docker.io/bitnamicharts"
+version: 0.1.0
+appVersion: "7.5.0"
+keywords:
+  - schema-registry
+  - confluent
+  - kafka
+home: https://www.confluent.io/
+sources:
+  - https://github.com/confluentinc/schema-registry
+maintainers:
+  - name: Your Name
+    email: your-email@example.com

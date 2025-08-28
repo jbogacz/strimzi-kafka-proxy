@@ -18,7 +18,7 @@ spec:
             clusters:
               - name: my-cluster
                 bootstrapServers: my-cluster-kafka-bootstrap.kafka:9092
-                schema-registry: http://confluent-schema-registry-app.kafka:8081
+                schema-registry: http://confluent-schema-registry.kafka:8081
                 zookeeper: my-cluster-zookeeper-client.kafka:2181
           auth:
             type: disabled

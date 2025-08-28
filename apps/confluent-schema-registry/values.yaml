@@ -1,8 +1,60 @@
-schema-registry:
-  enabled: true
-  kafka:
-    bootstrapServers: "my-cluster-kafka-bootstrap.kafka:9092"
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+# Default values for confluent-schema-registry
+replicaCount: 1
+
+image:
+  repository: confluentinc/cp-schema-registry
+  tag: "7.5.0"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Kafka configuration
+kafka:
+  bootstrapServers: "my-cluster-kafka-bootstrap.kafka:9092"
+
+# Schema Registry configuration
+schemaRegistry:
+  hostname: schema-registry
+  listeners: "http://0.0.0.0:8081"
+  kafkastoreTopicName: "_schemas"
+  kafkastoreTopicReplicationFactor: 1
+  
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /subjects
+    port: 8081
+  initialDelaySeconds: 60
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /subjects
+    port: 8081
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
