@@ -132,21 +132,30 @@ This project template can be adapted for various real-world scenarios:
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
+│   │       ├── deployment.yaml
+│   │       ├── service.yaml
+│   │       ├── configmap.yaml
+│   │       ├── ingress.yaml
+│   │       └── tests/
 │   ├── strimzi-operator.yaml              # ArgoCD Application for Strimzi operator (sync-wave: 1)
 │   ├── kafka-cluster.yaml                 # ArgoCD Application for Kafka cluster (sync-wave: 2)
-│   ├── kafka-cluster/                     # Helm chart for Kafka cluster
+│   ├── kafka-cluster/                     # Helm chart for Kafka cluster with external listeners
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   │       ├── kafka.yaml
+│   │       ├── kafka.yaml                 # Kafka CR with external NodePort listeners
 │   │       ├── kafka-connect.yaml
 │   │       └── pdb.yaml
 │   ├── kafka-topics.yaml                  # ArgoCD Application for Kafka topics
-│   ├── kafka-ui.yaml                      # ArgoCD Application for Kafka UI
-│   ├── confluent-schema-registry-app.yaml # ArgoCD Application for Confluent Schema Registry
-│   ├── confluent-schema-registry/         # Helm chart for Schema Registry
-│   │   ├── Chart.yaml
-│   │   └── values.yaml
+│   ├── kafka-ui.yaml                      # ArgoCD Application for Kafka UI (NodePort 30080)
+│   ├── confluent-schema-registry-app.yaml # ArgoCD Application for custom Schema Registry
+│   ├── confluent-schema-registry/         # Custom Helm chart for Schema Registry
+│   │   ├── Chart.yaml                     # Chart metadata (no external dependencies)
+│   │   ├── values.yaml                    # Configuration for Confluent image
+│   │   └── templates/
+│   │       ├── _helpers.tpl               # Helm template helpers
+│   │       ├── deployment.yaml            # Schema Registry deployment
+│   │       └── service.yaml               # NodePort service (port 32081)
 │   ├── schema-publisher-job-app.yaml      # ArgoCD Application for schema publishing job (sync-wave: 3)
 │   └── schema-publisher-job/              # Schema publisher job resources
 │       ├── schema-publisher-config.yaml   # ConfigMap with Python script
@@ -245,13 +254,46 @@ The default Kafka cluster includes:
 - **3 Kafka brokers** with 1Gi memory, 500m CPU each
 - **3 ZooKeeper nodes** with 512Mi memory, 250m CPU each  
 - **Internal listeners** on ports 9092 (plain) and 9093 (TLS)
+- **External listeners** on port 9094 with NodePort configuration (localhost access)
 - **Persistent storage** with configurable storage classes
 - **Topic and User operators** for resource management
 
+#### External Access Configuration
+
+The Kafka cluster is configured with **external NodePort listeners** that enable direct access from your local machine:
+
+**Kind Cluster Port Mappings:**
+- `localhost:32100` → Bootstrap Server (for initial connection)
+- `localhost:32000` → Kafka Broker 0 (for data transfer) 
+- `localhost:32001` → Kafka Broker 1
+- `localhost:32002` → Kafka Broker 2
+- `localhost:32081` → Schema Registry (web API)
+
+**External Listener Configuration:**
+```yaml
+listeners:
+  - name: external
+    port: 9094
+    type: nodeport
+    tls: false
+    configuration:
+      bootstrap:
+        nodePort: 32100
+        advertisedHost: localhost
+      brokers:
+        - broker: 0
+          nodePort: 32000
+          advertisedHost: localhost
+        # ... additional brokers
+```
+
+This configuration ensures that when clients connect to `localhost:32100`, Kafka brokers advertise `localhost:32000-32002` instead of internal cluster IPs.
+
 ### Accessing Kafka
 
-Once deployed, you can access Kafka using:
+The project is configured with **external listeners** that expose Kafka directly to your local machine:
 
+#### Internal Access (from within Kubernetes cluster)
 ```bash
 # Check Kafka cluster status
 kubectl get kafka -n kafka
@@ -259,10 +301,31 @@ kubectl get kafka -n kafka
 # Check Kafka pods
 kubectl get pods -n kafka
 
-# Port forward to Kafka (for testing)
-kubectl port-forward svc/my-cluster-kafka-bootstrap -n kafka 9092:9092
+# Internal bootstrap server (for pods in cluster)
+my-cluster-kafka-bootstrap.kafka:9092
+```
 
-# Create a test topic
+#### External Access (from localhost)
+```bash
+# External bootstrap server (from your laptop)
+localhost:32100
+
+# Test connectivity
+nc -zv localhost 32100
+
+# Individual brokers (for direct access)
+nc -zv localhost 32000  # Broker 0
+nc -zv localhost 32001  # Broker 1
+nc -zv localhost 32002  # Broker 2
+
+# Use with Kafka client tools
+kafka-console-producer --bootstrap-server localhost:32100 --topic test-topic
+kafka-console-consumer --bootstrap-server localhost:32100 --topic test-topic --from-beginning
+```
+
+#### Create Topics
+```bash
+# Create a test topic using kubectl
 kubectl apply -f - <<EOF
 apiVersion: kafka.strimzi.io/v1beta2  
 kind: KafkaTopic
@@ -310,12 +373,38 @@ The project includes Kafka UI for web-based cluster management (`apps/kafka-ui.y
 
 ### Confluent Schema Registry
 
-The project includes Confluent Schema Registry for managing Avro/JSON schemas (`apps/confluent-schema-registry-app.yaml`):
+The project includes a **custom Confluent Schema Registry Helm chart** for managing Avro/JSON/Protobuf schemas (`apps/confluent-schema-registry-app.yaml`):
 
-- **Version**: Latest from Confluent Helm chart
-- **Purpose**: Centralized schema management for Kafka producers/consumers
-- **Integration**: Connected to the Kafka cluster for schema storage
+- **Version**: 7.5.0 using official Confluent Docker image (`confluentinc/cp-schema-registry`)
+- **Purpose**: Centralized schema management for Kafka producers/consumers  
+- **Integration**: Connected to external Kafka cluster at `my-cluster-kafka-bootstrap.kafka:9092`
+- **Architecture**: Custom-built Helm chart with proper templates and values
 - **Namespace**: Deployed to the `kafka` namespace
+- **External Access**: Available via NodePort on localhost:32081 (after cluster recreation)
+
+#### Accessing Schema Registry
+
+**External Access (from localhost):**
+```bash
+# Test connectivity  
+nc -zv localhost 32081
+
+# Health check
+curl http://localhost:32081/
+
+# List schemas
+curl http://localhost:32081/subjects
+
+# Alternative: Port forwarding (immediate access)
+kubectl port-forward -n kafka service/confluent-schema-registry 8081:8081
+# Then access: http://localhost:8081
+```
+
+**Internal Access (from within cluster):**
+```bash
+# Service endpoint for applications in cluster
+confluent-schema-registry.kafka:8081
+```
 
 ### Schema Publisher Job
 
