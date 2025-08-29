@@ -547,6 +547,72 @@ The schema publisher job demonstrates how to:
 - Implement backup and disaster recovery procedures
 - Setup monitoring and alerting for critical metrics
 
+## Python Client Integration
+
+### Connecting from Local Python Applications
+
+With external listeners configured, you can connect to Kafka from Python applications running on your local machine:
+
+```python
+from kafka import KafkaProducer, KafkaConsumer
+import json
+
+# Producer example
+producer = KafkaProducer(
+    bootstrap_servers=['localhost:32100'],
+    value_serializer=lambda x: json.dumps(x).encode('utf-8')
+)
+
+# Send message
+producer.send('test-topic', {'message': 'Hello from localhost!'})
+producer.flush()
+
+# Consumer example  
+consumer = KafkaConsumer(
+    'test-topic',
+    bootstrap_servers=['localhost:32100'],
+    value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+)
+
+for message in consumer:
+    print(f"Received: {message.value}")
+```
+
+### Schema Registry Integration
+
+```python
+from confluent_kafka import Producer
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroSerializer
+
+# Schema Registry client
+schema_registry_client = SchemaRegistryClient({
+    'url': 'http://localhost:32081'  # Or use port forwarding to 8081
+})
+
+# Producer with Avro serialization
+producer_config = {
+    'bootstrap.servers': 'localhost:32100',
+}
+producer = Producer(producer_config)
+```
+
+### Common Connection Issues
+
+If you encounter connection timeouts:
+
+1. **Verify external listeners are working:**
+   ```bash
+   nc -zv localhost 32100
+   ```
+
+2. **Check broker advertisement:**
+   ```bash
+   kubectl logs -n kafka my-cluster-kafka-0 | grep advertised
+   ```
+
+3. **Ensure Kind port mappings are correct** in `setup-cluster.sh`
+
 ## Useful Commands
 
 ```bash
