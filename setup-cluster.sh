@@ -48,6 +48,22 @@ nodes:
   - containerPort: 30080
     hostPort: 30080
     protocol: TCP
+  # Kafka Bootstrap Server
+  - containerPort: 32100
+    hostPort: 32100
+    protocol: TCP
+  # Kafka Broker 0
+  - containerPort: 32000
+    hostPort: 32000
+    protocol: TCP
+  # Kafka Broker 1
+  - containerPort: 32001
+    hostPort: 32001
+    protocol: TCP
+  # Kafka Broker 2
+  - containerPort: 32002
+    hostPort: 32002
+    protocol: TCP
 - role: worker
   image: kindest/node:v1.31.9
 - role: worker

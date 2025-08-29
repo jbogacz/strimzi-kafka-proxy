@@ -17,6 +17,20 @@ spec:
         port: 9093
         type: internal
         tls: true
+      - name: external
+        port: 9094
+        type: nodeport
+        tls: false
+        configuration:
+          bootstrap:
+            nodePort: 32100
+          brokers:
+            - broker: 0
+              nodePort: 32000
+            - broker: 1
+              nodePort: 32001
+            - broker: 2
+              nodePort: 32002
     config:
       {{- toYaml .Values.kafka.config | nindent 6 }}
     storage:
