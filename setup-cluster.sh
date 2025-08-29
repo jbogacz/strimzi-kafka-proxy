@@ -64,6 +64,10 @@ nodes:
   - containerPort: 32002
     hostPort: 32002
     protocol: TCP
+  # Schema Registry
+  - containerPort: 32081
+    hostPort: 8081
+    protocol: TCP
 - role: worker
   image: kindest/node:v1.31.9
 - role: worker
