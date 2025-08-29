@@ -24,13 +24,17 @@ spec:
         configuration:
           bootstrap:
             nodePort: 32100
+            advertisedHost: localhost
           brokers:
             - broker: 0
               nodePort: 32000
+              advertisedHost: localhost
             - broker: 1
               nodePort: 32001
+              advertisedHost: localhost
             - broker: 2
               nodePort: 32002
+              advertisedHost: localhost
     config:
       {{- toYaml .Values.kafka.config | nindent 6 }}
     storage:
