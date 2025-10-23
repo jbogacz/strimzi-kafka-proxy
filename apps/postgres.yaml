@@ -38,8 +38,16 @@ spec:
               memory: 512Mi
               cpu: 500m
 
+          podSecurityContext:
+            enabled: true
+            fsGroup: 1001
+          containerSecurityContext:
+            enabled: true
+            runAsUser: 1001
+            runAsNonRoot: true
+
         volumePermissions:
-          enabled: true
+          enabled: false
 
         metrics:
           enabled: false
