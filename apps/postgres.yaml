@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgres
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: postgres
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: 15.5.38
+    helm:
+      values: |
+        auth:
+          enablePostgresUser: true
+          postgresPassword: "postgres"
+          username: "user"
+          password: "password"
+          database: "mydb"
+
+        primary:
+          service:
+            type: NodePort
+            nodePorts:
+              postgresql: 32432
+
+          persistence:
+            enabled: true
+            size: 8Gi
+
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+
+        volumePermissions:
+          enabled: true
+
+        metrics:
+          enabled: false
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: postgres
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
