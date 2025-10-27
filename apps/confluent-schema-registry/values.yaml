@@ -19,7 +19,8 @@ schemaRegistry:
   listeners: "http://0.0.0.0:8081"
   kafkastoreTopicName: "_schemas"
   kafkastoreTopicReplicationFactor: 1
-  
+  protobufCanonicalizeOnConsume: true
+
 # Service configuration
 service:
   type: NodePort
