@@ -20,8 +20,8 @@ metadata:
   name: postgres-config
   namespace: postgres
 data:
-  POSTGRES_DB: mydb
-  POSTGRES_USER: user
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
 ---
 apiVersion: v1
 kind: Secret
