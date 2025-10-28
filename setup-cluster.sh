@@ -69,8 +69,8 @@ nodes:
     hostPort: 32081
     protocol: TCP
   # PostgreSQL
-  - containerPort: 32432
-    hostPort: 32432
+  - containerPort: 35432
+    hostPort: 35432
     protocol: TCP
 - role: worker
   image: kindest/node:v1.31.9
