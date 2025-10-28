@@ -4,10 +4,9 @@ metadata:
   name: postgres-init-scripts
   namespace: postgres
 data:
-  # Scripts run in alphabetical order
-  # 01-create-database.sql: |
-  #   -- Create the testing_playground_service database
-  #   CREATE DATABASE testing_playground_service;
+  01-create-database.sql: |
+    -- Create the testing_playground_service database
+    CREATE DATABASE testing_playground_service;
 
   02-create-tables.sql: |
     -- Connect to testing_playground_service database and create tables
