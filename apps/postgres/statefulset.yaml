@@ -20,7 +20,7 @@ metadata:
   name: postgres-config
   namespace: postgres
 data:
-  POSTGRES_DB: postgres
+  POSTGRES_DB: test_db
   POSTGRES_USER: postgres
 ---
 apiVersion: v1

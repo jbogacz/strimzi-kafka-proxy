@@ -4,11 +4,8 @@ metadata:
   name: postgres-init-scripts
   namespace: postgres
 data:
-  01-create-database.sql: |
-    -- Create the testing_playground_service database
-    CREATE DATABASE testing_playground_service;
 
-  02-create-tables.sql: |
+  01-create-tables.sql: |
     -- Connect to testing_playground_service database and create tables
     \c testing_playground_service
 
@@ -43,7 +40,7 @@ data:
         PRIMARY KEY (task_name, task_instance)
     );
 
-  03-create-outbox.sql: |
+  02-create-outbox.sql: |
     -- Connect to testing_playground_service database and create outbox table
     \c testing_playground_service
 
@@ -65,12 +62,12 @@ data:
 
     CREATE INDEX IF NOT EXISTS idx_outbox_event_status ON outbox_event(status);
 
-  04-alter-outbox_event.sql: |
+  03-alter-outbox_event.sql: |
     -- Connect to testing_playground_service database and alter outbox_event table
     ALTER TABLE outbox_event ADD idempotence_key VARCHAR(511);
 
 
-  05-create-shedlock.sql: |
+  04-create-shedlock.sql: |
     -- Connect to testing_playground_service database and create shedlock table
     \c testing_playground_service
 
