@@ -2,3 +2,5 @@
 *.log
 .env
 .argocd_password
+
+apps/postgres/init-scripts.yaml
